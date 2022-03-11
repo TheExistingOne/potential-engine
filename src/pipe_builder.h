@@ -3,7 +3,7 @@
 #ifndef V4ENCS
 #define V4ENCS
 enum class V4L2Encoders {
-    CAMERA_H264, OPENMAX, SOFTWARE
+    CAMERA_H264, OPENMAX, SOFTWARE, V4L2M2M
 };
 #endif
 #ifndef VIDEO_SOURCES

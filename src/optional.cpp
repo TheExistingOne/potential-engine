@@ -18,7 +18,8 @@ bool judge = false;
 int rot = 0;
 bool prev = false;
 // V4L2 options
-bool hw_encoder = false;
+bool omx_encoder = false;
+bool v4l2_encoder = false;
 bool cam_encoder = false;
 char *video_dev = (char *) "/dev/video0";
 // common options
@@ -32,7 +33,7 @@ const char *url = DEFAULT_MOUNT;
 
 GOptionEntry entries[] = {
         {"rpi_cam",       'r', G_OPTION_FLAG_NONE,   G_OPTION_ARG_NONE, &rpi_cam_flag, "Use Raspberry Pi Camera module (default: false)",                                           nullptr},
-        {"shared_memory", 's', G_OPTION_FLAG_NONE,   G_OPTION_ARG_NONE, &shared_mem,   "Read frames from shared memory (default: false)"},
+        {"shared_memory", 's', G_OPTION_FLAG_NONE,   G_OPTION_ARG_NONE, &shared_mem,   "Read frames from shared memory (default: false)"                                                    },
         {"fps",           'f', G_OPTION_FLAG_NONE,   G_OPTION_ARG_INT,  &fps,          "Framerate in FPS (default: 30)",                                                            "FPS"},
         {"height",        'h', G_OPTION_FLAG_NONE,   G_OPTION_ARG_INT,  &height,       "Video height. Should be a standard resolution (in [240, 360, 480, 720] for most cameras.)", "HEIGHT"},
         {"width",         'w', G_OPTION_FLAG_NONE,   G_OPTION_ARG_INT,  &width,        "Video width. Only needs to be specified if you're using shared memory.",                    "WIDTH"},
@@ -49,7 +50,8 @@ static GOptionEntry netEntries[]{
 GOptionGroup *netOpts = g_option_group_new("net", "Networking options", "Show networking options", nullptr, nullptr);
 
 static GOptionEntry v4l2Entries[]{
-        {"use_omx",     'o', G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE,   &hw_encoder,  "Use OpenMAX hardware acceleration (default: false)",                                          nullptr},
+        {"use_omx",     'o', G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE,   &omx_encoder,  "Use OpenMAX hardware acceleration. WARNING: Depricated on RPi (default: false)",             nullptr},
+        {"v4l2_accel",   'v', G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE,   &v4l2_encoder, "Use V4L2M2M hardware acceleration. WARNING: RPi only (default: false)",                     nullptr},
         {"camera_h264", 'c', G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE,   &cam_encoder, "Use camera-provided h.264 feed for higher-end cameras (e.g. Logitech C920) (default: false)", nullptr},
         {"device",      'd', G_OPTION_FLAG_NONE, G_OPTION_ARG_STRING, &video_dev,   "Video4Linux2 device or shared memory socket to use (default: /dev/video0)",                   "DEVICE"},
         {nullptr}
@@ -79,8 +81,10 @@ V4L2Encoders selected_encoder() {
     if (cam_encoder && !shared_mem) {
         // shared memory is unencoded
         return V4L2Encoders::CAMERA_H264;
-    } else if (hw_encoder) {
+    } else if (omx_encoder) {
         return V4L2Encoders::OPENMAX;
+    } else if (v4l2_encoder){
+        return V4L2Encoders::V4L2M2M;
     } else {
         return V4L2Encoders::SOFTWARE;
     }

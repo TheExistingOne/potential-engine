@@ -37,6 +37,9 @@ encoder_string(const int *height, const int *width, const int *framerate, const 
             case V4L2Encoders::SOFTWARE:
                 noFmtEnc = "video/x-raw,height={h},framerate={f}/1,name=yuy ! videoconvert ! x264enc tune=zerolatency";
                 break;
+            case V4L2Encoders::V4L2M2M:
+                noFmtEnc = "video/x-raw,height={h},framerate={f}/1,name=yuy ! videoconvert ! v4l2h264enc ! video/x-h264,profile=baseline";
+                break;
         }
         return fmt::format(noFmtEnc, fmt::arg("h", *height), fmt::arg("f", *framerate));
     } else {
@@ -49,6 +52,9 @@ encoder_string(const int *height, const int *width, const int *framerate, const 
                 break;
             case V4L2Encoders::SOFTWARE:
                 noFmtEnc = "video/x-raw,format=I420,height={h},width={w},framerate={f}/1 ! queue ! x264enc tune=zerolatency";
+                break;
+            case V4L2Encoders::V4L2M2M:
+                noFmtEnc = "video/x-raw,format=I420,height={h},width={w},framerate={f}/1 ! queue ! v4l2h264enc ! video/x-h264,profile=baseline";
                 break;
         }
         return fmt::format(noFmtEnc, fmt::arg("h", *height), fmt::arg("w", *width), fmt::arg("f", *framerate));
